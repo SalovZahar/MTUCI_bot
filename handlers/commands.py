@@ -29,16 +29,16 @@ async def cmd_start(message: Message):
     await message.answer(START_MESSAGE)
 
 @router.message(Command("info"))
-async def cmd_start(message: Message):
+async def cmd_info(message: Message):
     await message.answer(INFO_MESSAGE)
 
 @router.message(Command("help"))
-async def cmd_start(message: Message):
+async def cmd_help(message: Message):
     await message.answer(HELP_MESSAGE)
 
 # Обработчик команды /clear
 @router.message(Command("clear"))
-async def clear_context(message: Message):
+async def cmd_clear_context(message: Message):
     user_id = message.from_user.id
 
     # Очищаем контекст для пользователя

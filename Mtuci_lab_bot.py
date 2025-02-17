@@ -12,14 +12,13 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 # Объект бота
-
 bot = Bot(os.getenv('BOT_TOKEN'))
 
 # Диспетчер
 dp = Dispatcher()
 
 # Подключаем хэндленры к диспетчеру через роутер
-# Важен порядок импортов! Если мы поменяем местами регистрацию роутеров,
+# Важен порядок импортов. Если мы поменяем местами регистрацию роутеров,
 # то, например, команда /start передасться хэндлеру из OpenRouter,
 # поскольку она первой успешно пройдёт все фильтры.
 dp.include_routers(commands.router, different_types.router, OpenRouter.router)

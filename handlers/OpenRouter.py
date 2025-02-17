@@ -16,12 +16,15 @@ OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 # URL-адрес API OpenRouter для отправки запросов.
 OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
 
+# Допустимая длина сообщения
+MAX_MESSAGE_LENGTH = 4096
+
 # История диалога (для поддержки контекста)
 user_context = {}
 
 # Обработчик текстовых сообщений
 @router.message()
-async def handle_message(message: Message):
+async def talk_with_ai(message: Message):
     user_id = message.from_user.id
     user_input = message.text
 
@@ -37,6 +40,10 @@ async def handle_message(message: Message):
 
     # Добавляем ответ LLM в контекст
     user_context[user_id].append({"role": "assistant", "content": response_text})
+
+    # Обрезаем сообщение до допустимой длины
+    if len(response_text) > MAX_MESSAGE_LENGTH:
+        response_text = response_text[:MAX_MESSAGE_LENGTH]
 
     # Убедаемся что ответ от модели (google/gemini-2.0-flash-001) не пустой.
     if not response_text or response_text.strip() == "":
@@ -61,9 +68,10 @@ async def query_llm(messages):
         response = requests.post(OPENROUTER_ENDPOINT, headers=headers, json=data)
 
         # Проверка, что запрос завершился успешно (код ответа 200).
-        response.raise_for_status()
-        result = response.json()
-        return result['choices'][0]['message']['content']
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+        else:
+            return f"Ошибка OpenRouter: {response.status_code} - {response.text}"
     except Exception as e:
         logger.error(f"Ответ сервера: {e.response.  text}")
         return "Произошла ошибка при обработке вашего запроса."
